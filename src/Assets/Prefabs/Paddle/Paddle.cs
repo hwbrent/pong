@@ -7,7 +7,6 @@ public class Paddle : MonoBehaviour
     public KeyCode upKey;
     public KeyCode downKey;
 
-    private Camera camera;
     private BoxCollider2D box;
 
     // Used when moving the paddle up/down
@@ -16,7 +15,6 @@ public class Paddle : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        camera = GameObject.FindObjectOfType<Camera>();
         box = this.GetComponent<BoxCollider2D>();
         movementFactor = 0.0625f;
     }
@@ -38,12 +36,12 @@ public class Paddle : MonoBehaviour
     /// Modifies `this.transform` in order to move the paddle up/down.
     /// </summary>
     void ProcessKeyPress() {
-        Vector3 maxPosInScreen = camera.WorldToScreenPoint(box.bounds.max);
-        Vector3 minPosInScreen = camera.WorldToScreenPoint(box.bounds.min);
+        Vector3 maxPosInScreen = Camera.main.WorldToScreenPoint(box.bounds.max);
+        Vector3 minPosInScreen = Camera.main.WorldToScreenPoint(box.bounds.min);
 
         // If the key for moving the paddle up is pressed, and the top of
         // the paddle is below the top of the screen.
-        if (Input.GetKey(this.upKey) && maxPosInScreen.y < camera.pixelHeight)
+        if (Input.GetKey(this.upKey) && maxPosInScreen.y < Camera.main.pixelHeight)
         {
             this.transform.Translate(Vector3.up * this.movementFactor);
         }
