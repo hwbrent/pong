@@ -12,7 +12,7 @@ public class Ball : MonoBehaviour
     private Vector2 velocity;
 
     // The overall rate of movement of the ball.
-    private float speed;
+    private float magnitude = 0.0625f;
 
     // Start is called before the first frame update.
     void Start()
@@ -20,13 +20,7 @@ public class Ball : MonoBehaviour
         this.circleCollider = this.GetComponent<CircleCollider2D>();
         this.rigidBody = this.GetComponent<Rigidbody2D>();
 
-        this.velocity = new Vector2(0.0625f, 0.03125f);
-        this.speed = Mathf.Sqrt(
-            Mathf.Pow(0.0625f, 2) + Mathf.Pow(0.03125f, 2)
-        );
-
-        // this.velocity = new Vector2(speed, 0f);
-        // this.speed = 0.0625f;
+        this.velocity = this.GenerateRandomVelocity();
     }
 
     // Update is called once per frame.
@@ -36,9 +30,31 @@ public class Ball : MonoBehaviour
     }
 
     /// <summary>
+    /// Randomly generates the initial 'x' and 'y' components of 'this.velocity'.
+    /// </summary>
+    private Vector2 GenerateRandomVelocity()
+    {
+        float y = UnityEngine.Random.Range(-0.03125f, 0.03125f);
+        float x = Mathf.Sqrt(
+            Mathf.Pow(this.magnitude, 2) - Mathf.Pow(y, 2)
+        );
+
+        // Randomly flip the x direction.
+        // 'https://www.loekvandenouweland.com/content/random-boolean-in-csharp.html'
+        System.Random random = new System.Random();
+        bool randomBool = random.Next(2) == 1; // 0 = false, 1 = true;
+        if (randomBool)
+        {
+            x *= -1;
+        }
+
+        return new Vector2(x,y);
+    }
+
+    /// <summary>
     /// Moves the ball in the x and y direction every frame.
     /// </summary>
-    void Move()
+    private void Move()
     {
         // If the ball is exiting the screen view, we need to bounce
         // it back down.
@@ -52,7 +68,7 @@ public class Ball : MonoBehaviour
     /// <summary>
     /// Indicates whether the ball is fully inside the boundaries of the screen.
     /// </summary>
-    bool IsInBounds()
+    public bool IsInBounds()
     {
         Vector3 maxPos = Camera.main.WorldToScreenPoint(this.circleCollider.bounds.max);
         Vector3 minPos = Camera.main.WorldToScreenPoint(this.circleCollider.bounds.min);
@@ -62,7 +78,7 @@ public class Ball : MonoBehaviour
     /// <summary>
     /// Bounces the ball off the top/bottom boundaries of the screen.
     /// </summary>
-    void BounceOffScreenBoundary()
+    private void BounceOffScreenBoundary()
     {
         this.velocity.y *= -1;
     }
@@ -70,7 +86,7 @@ public class Ball : MonoBehaviour
     /// <summary>
     /// Bounces the ball off the paddle.
     /// </summary>
-    void BounceOffPaddle(GameObject paddle)
+    private void BounceOffPaddle(GameObject paddle)
     {
         /*
         - Basically we want the overall velocity of the ball to be the same (this.velocity).
@@ -92,7 +108,7 @@ public class Ball : MonoBehaviour
 
         float adjustedDiffY = diffY / scale;
         float newXMovement = Mathf.Sqrt(
-            Mathf.Pow(this.speed,2) - Mathf.Pow(adjustedDiffY,2)
+            Mathf.Pow(this.magnitude,2) - Mathf.Pow(adjustedDiffY,2)
         );
 
         // Add correct polarity depending on whether the ball should be going left or right.
